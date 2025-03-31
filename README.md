@@ -79,31 +79,13 @@ npm run build
 
 ---
 
-## 📁 Folder Structure
-
-```
-careersync/
-│
-├── public/
-│   └── icon.png
-├── src/
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-├── popup.html
-├── vite.config.ts
-├── tailwind.config.js
-└── postcss.config.js
-```
-
----
 
 ## 🙌 Contributing
 
-Pull requests and suggestions are welcome! Let’s build the future of AI-assisted job search together.
+Pull requests and suggestions are welcome! Let’s build the future of AI-assisted job searches together.
 
 ---
 
 ## 📝 License
 
-MIT © 2025 CareerSync
+Joe, Jerry and Jimmy reserve the rights © 2025 CareerSync
