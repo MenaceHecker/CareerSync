@@ -1,54 +1,91 @@
-# React + TypeScript + Vite
+# CareerSync
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CareerSync is a cross-browser, AI-powered Chrome extension that compares your resume against job descriptions to identify missing skills and recommend improvements. It parses PDF and DOCX files, extracts text, and uses GPT (coming soon) to enhance your job application process.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## Expanding the ESLint configuration
+- Upload and parse resumes in **PDF** and **DOCX** formats
+- Paste job descriptions to compare against resume content
+- Displays parsed resume text for transparency
+- Shows file name and size after upload
+- Sleek UI built for Chrome extension popups using **Tailwind CSS**
+- Ready for GPT-powered AI analysis and skill suggestions (next step)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 🚀 Tech Stack
+
+- **React** + **TypeScript**
+- **Vite** (bundler)
+- **Tailwind CSS**
+- **pdfjs-dist** (PDF parsing)
+- **mammoth** (DOCX parsing)
+- **Chrome Extension APIs**
+- **GPT integration (coming soon)**
+
+---
+
+## 📦 Dependencies
+
+Make sure these are installed:
+
+```bash
+npm install react react-dom
+npm install -D typescript vite @vitejs/plugin-react-swc
+
+npm install pdfjs-dist@3 mammoth
+npm install -D tailwindcss@3.4.1 postcss autoprefixer
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ⚙️ Project Setup
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+# 1. Clone the repo
+git clone https://github.com/your-username/CareerSync.git
+cd CareerSync/careersync
+
+# 2. Install dependencies
+npm install
+
+# 3. Start development server (optional)
+npm run dev
+
+# 4. Build for extension
+npm run build
 ```
+
+---
+
+## 🧩 Load the Extension in Chrome
+
+1. Open `chrome://extensions`
+2. Enable **Developer mode**
+3. Click **"Load unpacked"**
+4. Select the `dist/` folder from this project
+5. Click the CareerSync icon to test the popup
+
+---
+
+## 🧠 Upcoming Features
+
+- 🔌 OpenAI GPT integration
+- 📊 Skill match scoring
+- ✍️ Smart resume rewriting
+- ☁️ Save sessions with AWS Lambda
+
+---
+
+
+## 🙌 Contributing
+
+Pull requests and suggestions are welcome! Let’s build the future of AI-assisted job searches together.
+
+---
+
+## 📝 License
+
+Joe, Jerry and Jimmy reserve the rights © 2025 CareerSync
