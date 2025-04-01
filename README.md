@@ -35,8 +35,15 @@ Make sure these are installed:
 npm install react react-dom
 npm install -D typescript vite @vitejs/plugin-react-swc
 
-npm install pdfjs-dist@3 mammoth
+# AI & resume parsing
+npm install openai pdfjs-dist mammoth
+
+# Tailwind CSS
 npm install -D tailwindcss@3.4.1 postcss autoprefixer
+
+# Chrome extension types
+npm install -D @types/chrome
+
 ```
 
 ---
