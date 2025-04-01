@@ -1,4 +1,6 @@
-import { useState } from 'react';
+/// <reference types="chrome" />
+
+import { useEffect, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import workerSrc from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import mammoth from 'mammoth';
@@ -14,6 +16,15 @@ function App() {
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+
+  useEffect(() => {
+    chrome.storage?.local.get('jobDescription', (data) => {
+      if (data?.jobDescription) {
+        setJobDescription(data.jobDescription);
+        console.log("Auto-filled JD from content script ✅");
+      }
+    });
+  }, []);
 
   const handleFileUpload = async (file: File) => {
     setResumeFile(file);
@@ -65,8 +76,8 @@ function App() {
 
   return (
     <div className="w-[360px] h-[560px] bg-gradient-to-br from-blue-50 to-blue-100 font-sans shadow-xl overflow-auto rounded-md">
-      {/* Top Navbar */}
-      <nav className="flex justify-between items-center px-4 py-2 bg-white shadow rounded-t-md text-sm">
+      {/* Navbar */}
+      <nav className="flex items-center justify-between bg-white shadow px-4 py-2 rounded-t-md">
         <div className="flex items-center space-x-2">
           <img src="./icon.png" alt="CareerSync" className="w-6 h-6 rounded" />
           <span className="text-blue-700 font-bold text-base">CareerSync</span>
@@ -74,7 +85,7 @@ function App() {
         <span className="text-xs text-gray-400">v1.0</span>
       </nav>
 
-      {/* Tab Buttons */}
+      {/* Tab Menu */}
       <div className="flex justify-around bg-white text-sm border-b border-gray-200">
         {['profile', 'documents', 'dashboard'].map((tab) => (
           <button
@@ -98,7 +109,7 @@ function App() {
         {activeTab === 'profile' && (
           <div>
             <h2 className="text-lg font-bold text-gray-800 mb-2">Your Profile</h2>
-            <p className="text-gray-600 text-sm">Only certified Joes can access this menu.</p>
+            <p className="text-gray-600 text-sm">Profile details will go here (future feature).</p>
           </div>
         )}
 
@@ -130,20 +141,35 @@ function App() {
               )}
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Paste Job Description</label>
-              <textarea
-                className="w-full h-24 p-2 border border-gray-300 rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
-                placeholder="Paste job description here..."
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-              />
+            <div className="mb-2 flex justify-between items-center">
+              <label className="block text-sm font-medium text-gray-700">Job Description</label>
+              <button
+                className="text-xs text-blue-600 underline"
+                onClick={() => {
+                  chrome.storage.local.get('jobDescription', (data) => {
+                    if (data?.jobDescription) {
+                      setJobDescription(data.jobDescription);
+                    } else {
+                      alert("No job description found on this page.");
+                    }
+                  });
+                }}
+              >
+                🔁 Scan page again
+              </button>
             </div>
+
+            <textarea
+              className="w-full h-24 p-2 border border-gray-300 rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
+              placeholder="Paste or auto-detected job description..."
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+            />
 
             <button
               onClick={handleAnalyze}
               disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+              className="w-full mt-3 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
             >
               {loading ? 'Analyzing with GPT...' : 'Analyze'}
             </button>
@@ -167,7 +193,7 @@ function App() {
         {activeTab === 'dashboard' && (
           <div>
             <h2 className="text-lg font-bold text-gray-800 mb-2">Dashboard</h2>
-            <p className="text-gray-600 text-sm">When is this gonna come out?</p>
+            <p className="text-gray-600 text-sm">Coming soon: Visual insights, match score, GPT suggestions.</p>
           </div>
         )}
       </div>
