@@ -4,7 +4,7 @@ CareerSync is a cross-browser, AI-powered Chrome extension that compares your re
 
 ---
 
-## ✨ Features
+##  Features
 
 - Upload and parse resumes in **PDF** and **DOCX** formats
 - Paste job descriptions to compare against resume content
@@ -15,7 +15,7 @@ CareerSync is a cross-browser, AI-powered Chrome extension that compares your re
 
 ---
 
-## 🚀 Tech Stack
+##  Tech Stack
 
 - **React** + **TypeScript**
 - **Vite** (bundler)
@@ -27,7 +27,7 @@ CareerSync is a cross-browser, AI-powered Chrome extension that compares your re
 
 ---
 
-## 📦 Dependencies
+##  Dependencies
 
 Make sure these are installed:
 
@@ -48,7 +48,7 @@ npm install -D @types/chrome
 
 ---
 
-## ⚙️ Project Setup
+## ⚙ Project Setup
 
 ```bash
 # 1. Clone the repo
@@ -67,7 +67,7 @@ npm run build
 
 ---
 
-## 🧩 Load the Extension in Chrome
+##  Load the Extension in Chrome
 
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
@@ -77,7 +77,7 @@ npm run build
 
 ---
 
-## 🧠 Upcoming Features
+##  Upcoming Features
 
 - 🔌 OpenAI GPT integration
 - 📊 Skill match scoring
@@ -87,12 +87,12 @@ npm run build
 ---
 
 
-## 🙌 Contributing
+##  Contributing
 
 Pull requests and suggestions are welcome! Let’s build the future of AI-assisted job searches together.
 
 ---
 
-## 📝 License
+##  License
 
 Joe, Jerry and Jimmy reserve the rights © 2025 CareerSync
