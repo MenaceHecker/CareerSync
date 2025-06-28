@@ -9,6 +9,13 @@ import { analyzeResumeWithJD } from './utils/openai';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
+interface H1BResult {
+  company: string;
+  sponsorsH1B: boolean;
+  details: string;
+  error?: string;
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState<'profile' | 'documents' | 'dashboard'>('documents');
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -16,15 +23,45 @@ function App() {
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  
+  // H1B search states
+  const [companyName, setCompanyName] = useState('');
+  const [h1bLoading, setH1bLoading] = useState(false);
+  const [h1bResult, setH1bResult] = useState<H1BResult | null>(null);
 
   useEffect(() => {
     chrome.storage?.local.get('jobDescription', (data) => {
       if (data?.jobDescription) {
         setJobDescription(data.jobDescription);
         console.log("Auto-filled JD from content script ");
+        
+        // Try to extract company name from job description
+        extractCompanyName(data.jobDescription);
       }
     });
   }, []);
+
+  const extractCompanyName = (jd: string) => {
+    // Simple regex patterns to extract company name
+    const patterns = [
+      /at ([A-Z][a-zA-Z\s&.,]+?)(?:\s|,|\.|\n)/g,
+      /([A-Z][a-zA-Z\s&.,]+?) is looking/gi,
+      /([A-Z][a-zA-Z\s&.,]+?) seeks/gi,
+      /join ([A-Z][a-zA-Z\s&.,]+?)(?:\s|,|\.|\n)/gi
+    ];
+    
+    for (const pattern of patterns) {
+      const match = pattern.exec(jd);
+      if (match && match[1] && match[1].length < 50) {
+        const extractedName = match[1].trim();
+        // Filter out common words that aren't company names
+        if (!/(the|and|or|for|with|our|team|department|role|position)$/i.test(extractedName)) {
+          setCompanyName(extractedName);
+          break;
+        }
+      }
+    }
+  };
 
   const handleFileUpload = async (file: File) => {
     setResumeFile(file);
@@ -71,6 +108,56 @@ function App() {
       setResult('❌ Failed to analyze. Please check your API key or network.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleH1BSearch = async () => {
+    if (!companyName.trim()) {
+      alert('Please enter a company name to search for H1B sponsorship.');
+      return;
+    }
+
+    setH1bLoading(true);
+    setH1bResult(null);
+
+    try {
+      // Send message to content script
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      chrome.tabs.sendMessage(
+        tab.id!,
+        { action: "searchH1B", companyName: companyName.trim() },
+        (response) => {
+          setH1bLoading(false);
+          if (chrome.runtime.lastError) {
+            console.error('Chrome runtime error:', chrome.runtime.lastError);
+            setH1bResult({
+              company: companyName,
+              sponsorsH1B: false,
+              details: 'Error communicating with content script.',
+              error: chrome.runtime.lastError.message
+            });
+          } else if (response) {
+            setH1bResult(response);
+          } else {
+            setH1bResult({
+              company: companyName,
+              sponsorsH1B: false,
+              details: 'No response received from search.',
+              error: 'No response'
+            });
+          }
+        }
+      );
+    } catch (err) {
+      console.error('H1B search error:', err);
+      setH1bLoading(false);
+      setH1bResult({
+        company: companyName,
+        sponsorsH1B: false,
+        details: 'Failed to perform H1B search.',
+        error: err instanceof Error ? err.message : 'Unknown error'
+      });
     }
   };
 
@@ -149,6 +236,7 @@ function App() {
                   chrome.storage.local.get('jobDescription', (data) => {
                     if (data?.jobDescription) {
                       setJobDescription(data.jobDescription);
+                      extractCompanyName(data.jobDescription);
                     } else {
                       alert("No job description found on this page.");
                     }
@@ -163,8 +251,59 @@ function App() {
               className="w-full h-24 p-2 border border-gray-300 rounded resize-none focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm"
               placeholder="Paste or auto-detected job description..."
               value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
+              onChange={(e) => {
+                setJobDescription(e.target.value);
+                extractCompanyName(e.target.value);
+              }}
             />
+
+            {/* H1B Search Section */}
+            <div className="mt-4 p-3 bg-white rounded border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🏢 H1B Sponsorship Check
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="flex-1 p-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  placeholder="Company name..."
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                />
+                <button
+                  onClick={handleH1BSearch}
+                  disabled={h1bLoading}
+                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition disabled:opacity-50 text-sm"
+                >
+                  {h1bLoading ? '🔍' : 'Check'}
+                </button>
+              </div>
+              
+              {h1bResult && (
+                <div className={`mt-3 p-2 rounded text-xs ${
+                  h1bResult.error 
+                    ? 'bg-red-100 border border-red-300 text-red-700'
+                    : h1bResult.sponsorsH1B 
+                      ? 'bg-green-100 border border-green-300 text-green-700'
+                      : 'bg-yellow-100 border border-yellow-300 text-yellow-700'
+                }`}>
+                  <div className="font-medium mb-1">
+                    {h1bResult.error ? '❌ Error' : h1bResult.sponsorsH1B ? '✅ Likely Sponsors H1B' : '⚠️ Unclear/No Sponsorship'}
+                  </div>
+                  <div className="text-xs">
+                    <strong>Company:</strong> {h1bResult.company}
+                  </div>
+                  <div className="text-xs mt-1">
+                    <strong>Details:</strong> {h1bResult.details}
+                  </div>
+                  {h1bResult.error && (
+                    <div className="text-xs mt-1 text-red-600">
+                      <strong>Error:</strong> {h1bResult.error}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             <button
               onClick={handleAnalyze}
@@ -194,6 +333,19 @@ function App() {
           <div>
             <h2 className="text-lg font-bold text-gray-800 mb-2">Dashboard</h2>
             <p className="text-gray-600 text-sm">Coming soon: Visual insights, match score, GPT suggestions.</p>
+            
+            {/* Quick H1B Overview */}
+            {h1bResult && (
+              <div className="mt-4 p-3 bg-white rounded border border-gray-200">
+                <h3 className="font-medium text-gray-800 mb-2">Recent H1B Check</h3>
+                <div className={`text-sm ${
+                  h1bResult.sponsorsH1B ? 'text-green-600' : 'text-yellow-600'
+                }`}>
+                  <div><strong>{h1bResult.company}</strong></div>
+                  <div className="text-xs mt-1">{h1bResult.details}</div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
