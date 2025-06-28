@@ -29,7 +29,7 @@ CareerSync is a cross-browser, AI-powered Chrome extension that compares your re
 
 ## 📦 Dependencies
 
-Make sure these are installed:
+Ensure Below dependenciesare installed:
 
 ```bash
 npm install react react-dom
