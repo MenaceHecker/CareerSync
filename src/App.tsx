@@ -21,7 +21,7 @@ function App() {
     chrome.storage?.local.get('jobDescription', (data) => {
       if (data?.jobDescription) {
         setJobDescription(data.jobDescription);
-        console.log("Auto-filled JD from content script ✅");
+        console.log("Auto-filled JD from content script ");
       }
     });
   }, []);

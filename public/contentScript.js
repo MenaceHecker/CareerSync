@@ -29,10 +29,10 @@ function findJobDescription() {
   });
 
   if (bestMatch) {
-    console.log("CareerSync: Detected Job Description ✅");
+    console.log("CareerSync: Detected Job Description ");
     chrome.storage.local.set({ jobDescription: bestMatch.slice(0, 8000) });
   } else {
-    console.log("CareerSync: No job description found ❌");
+    console.log("CareerSync: No job description found ");
   }
 }
 
