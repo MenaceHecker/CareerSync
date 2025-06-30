@@ -12,6 +12,8 @@ CareerSync is a cross-browser, AI-powered Chrome extension that compares your re
 - Shows file name and size after upload
 - Sleek UI built for Chrome extension popups using **Tailwind CSS**
 - Ready for GPT-powered AI analysis and skill suggestions (next step)
+- Shows Company name and an option to look if the company sponsors a Work VISA
+
 
 ---
 
