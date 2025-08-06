@@ -28,7 +28,7 @@ JOB: ${jobDescription.substring(0, 1000)}...`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'html-model', // Your model name
+        model: 'html-model', 
         prompt: prompt,
         stream: false,
         options: {
@@ -45,19 +45,16 @@ JOB: ${jobDescription.substring(0, 1000)}...`;
 
     const data: OllamaResponse = await response.json();
     
-    // Try to parse as JSON first
     try {
       const analysis: CareerSyncAnalysis = JSON.parse(data.response);
       return formatAnalysisResult(analysis);
     } catch (jsonError) {
-      // If not valid JSON, return the raw response
       return `📊 Resume Analysis Results:\n\n${data.response}`;
     }
 
   } catch (error) {
     console.error('Ollama analysis error:', error);
-    
-    // Fallback error messages
+
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return `❌ Cannot connect to local AI model. 
       
@@ -91,8 +88,6 @@ ${analysis.recommendations.map(rec => `• ${rec}`).join('\n')}
 
 🔍 Role Alignment: ${analysis.role_alignment}`;
 };
-
-// Alternative function for testing if Ollama is available
 export const testOllamaConnection = async (): Promise<boolean> => {
   try {
     const response = await fetch('http://localhost:11434/api/tags', {
