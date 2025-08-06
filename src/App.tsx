@@ -196,7 +196,7 @@ function App() {
         {activeTab === 'profile' && (
           <div>
             <h2 className="text-lg font-bold text-gray-800 mb-2">Your Profile</h2>
-            <p className="text-gray-600 text-sm">Profile details will go here (future feature).</p>
+            <p className="text-gray-600 text-sm">Profile details will go here (Coming soon).</p>
           </div>
         )}
 
