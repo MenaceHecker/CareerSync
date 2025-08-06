@@ -5,7 +5,8 @@ import * as pdfjsLib from 'pdfjs-dist';
 import workerSrc from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import mammoth from 'mammoth';
 import './index.css';
-import { analyzeResumeWithJD } from './utils/openai';
+// Replace OpenAI import with Ollama
+import { analyzeResumeWithOllama, testOllamaConnection } from './utils/ollama';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
@@ -23,6 +24,7 @@ function App() {
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [ollamaStatus, setOllamaStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
   
   // H1B search states
   const [companyName, setCompanyName] = useState('');
@@ -39,7 +41,16 @@ function App() {
         extractCompanyName(data.jobDescription);
       }
     });
+
+    // Check Ollama status on component mount
+    checkOllamaStatus();
   }, []);
+
+  const checkOllamaStatus = async () => {
+    setOllamaStatus('checking');
+    const isAvailable = await testOllamaConnection();
+    setOllamaStatus(isAvailable ? 'available' : 'unavailable');
+  };
 
   const extractCompanyName = (jd: string) => {
     // Simple regex patterns to extract company name
@@ -97,15 +108,20 @@ function App() {
       return;
     }
 
+    if (ollamaStatus !== 'available') {
+      alert('Local AI model is not available. Please ensure Ollama is running.');
+      return;
+    }
+
     setLoading(true);
     setResult(null);
 
     try {
-      const response = await analyzeResumeWithJD(resumeText, jobDescription);
+      const response = await analyzeResumeWithOllama(resumeText, jobDescription);
       setResult(response || 'No analysis returned.');
     } catch (err) {
-      console.error('OpenAI API error:', err);
-      setResult('❌ Failed to analyze. Please check your API key or network.');
+      console.error('Ollama analysis error:', err);
+      setResult('❌ Failed to analyze with local AI model. Please check if Ollama is running and your model is available.');
     } finally {
       setLoading(false);
     }
@@ -161,6 +177,30 @@ function App() {
     }
   };
 
+  // Ollama status indicator component
+  const OllamaStatusIndicator = () => (
+    <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${
+      ollamaStatus === 'available' ? 'bg-green-100 text-green-700' :
+      ollamaStatus === 'unavailable' ? 'bg-red-100 text-red-700' :
+      'bg-yellow-100 text-yellow-700'
+    }`}>
+      <span className={`w-2 h-2 rounded-full ${
+        ollamaStatus === 'available' ? 'bg-green-500' :
+        ollamaStatus === 'unavailable' ? 'bg-red-500' :
+        'bg-yellow-500'
+      }`}></span>
+      {ollamaStatus === 'available' && 'Local AI Ready'}
+      {ollamaStatus === 'unavailable' && 'Local AI Offline'}
+      {ollamaStatus === 'checking' && 'Checking AI...'}
+      <button 
+        onClick={checkOllamaStatus}
+        className="ml-1 text-xs underline hover:no-underline"
+      >
+        ↻
+      </button>
+    </div>
+  );
+
   return (
     <div className="w-[360px] h-[560px] bg-gradient-to-br from-blue-50 to-blue-100 font-sans shadow-xl overflow-auto rounded-md">
       {/* Navbar */}
@@ -169,7 +209,10 @@ function App() {
           <img src="./icon.png" alt="CareerSync" className="w-6 h-6 rounded" />
           <span className="text-blue-700 font-bold text-base">CareerSync</span>
         </div>
-        <span className="text-xs text-gray-400">v1.0</span>
+        <div className="flex items-center gap-2">
+          <OllamaStatusIndicator />
+          <span className="text-xs text-gray-400">v1.0</span>
+        </div>
       </nav>
 
       {/* Tab Menu */}
@@ -307,10 +350,11 @@ function App() {
 
             <button
               onClick={handleAnalyze}
-              disabled={loading}
+              disabled={loading || ollamaStatus !== 'available'}
               className="w-full mt-3 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
             >
-              {loading ? 'Analyzing with GPT...' : 'Analyze'}
+              {loading ? 'Analyzing with Local AI...' : 
+               ollamaStatus !== 'available' ? 'Local AI Unavailable' : 'Analyze'}
             </button>
 
             {result && (
@@ -346,6 +390,20 @@ function App() {
                 </div>
               </div>
             )}
+
+            {/* Ollama Status Dashboard */}
+            <div className="mt-4 p-3 bg-white rounded border border-gray-200">
+              <h3 className="font-medium text-gray-800 mb-2">AI Model Status</h3>
+              <OllamaStatusIndicator />
+              {ollamaStatus === 'unavailable' && (
+                <div className="mt-2 text-xs text-gray-600">
+                  <p>To use local AI analysis:</p>
+                  <p>1. Install Ollama</p>
+                  <p>2. Run: ollama serve</p>
+                  <p>3. Run: ollama run html-model</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
